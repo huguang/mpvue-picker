@@ -4,7 +4,7 @@
     <div class="mpvue-picker-content " :class="{'mpvue-picker-view-show':showPicker}">
       <div class="mpvue-picker__hd" catchtouchmove="true">
         <div class="mpvue-picker__action" @click="pickerCancel">取消</div>
-        <div class="mpvue-picker__action" :style="{color:themeColor}" @click="pickerConfirm">确定</div>
+        <div class="mpvue-picker__action" :style="{color: themeColor}" @click="pickerConfirm">确定</div>
       </div>
       <!-- 单列 -->
       <picker-view indicator-style="height: 40px;" class="mpvue-picker-view" :value="pickerValue" @change="pickerChange" v-if="mode==='selector' && pickerValueSingleArray.length > 0">
@@ -27,34 +27,17 @@
       </picker-view>
       <!-- 多列选择 -->
       <picker-view indicator-style="height: 40px;" class="mpvue-picker-view" :value="pickerValue" @change="pickerChange" v-if="mode==='multiSelector'">
-        <block v-for="(n,index) in pickerValueMulArray.length" :key="index">
-          <picker-view-column>
+        <block>
+          <picker-view-column v-for="(n,index) in pickerValueMulArray.length" :key="index">
             <div class="picker-item" v-for="(item,index1) in pickerValueMulArray[n]" :key="index1">{{item.label}}</div>
           </picker-view-column>
         </block>
       </picker-view>
-      <!-- 二级联动 -->
-      <picker-view indicator-style="height: 40px;" class="mpvue-picker-view" :value="pickerValue" @change="pickerChangeMul" v-if="mode==='multiLinkageSelector' && deepLength===2">
+      <!-- 联动选择器 -->
+      <picker-view indicator-style="height: 40px;" class="mpvue-picker-view" :value="pickerValue" @change="pickerChangeMultiLinkage" v-if="mode==='multiLinkageSelector'">
         <block>
-          <picker-view-column>
-            <div class="picker-item" v-for="(item,index) in pickerValueMulTwoOne" :key="index">{{item.label}}</div>
-          </picker-view-column>
-          <picker-view-column>
-            <div class="picker-item" v-for="(item,index) in pickerValueMulTwoTwo" :key="index">{{item.label}}</div>
-          </picker-view-column>
-        </block>
-      </picker-view>
-      <!-- 三级联动 -->
-      <picker-view indicator-style="height: 40px;" class="mpvue-picker-view" :value="pickerValue" @change="pickerChangeMul" v-if="mode==='multiLinkageSelector' && deepLength===3">
-        <block>
-          <picker-view-column>
-            <div class="picker-item" v-for="(item,index) in pickerValueMulThreeOne" :key="index">{{item.label}}</div>
-          </picker-view-column>
-          <picker-view-column>
-            <div class="picker-item" v-for="(item,index) in pickerValueMulThreeTwo" :key="index">{{item.label}}</div>
-          </picker-view-column>
-          <picker-view-column>
-            <div class="picker-item" v-for="(item,index) in pickerValueMulThreeThree" :key="index">{{item.label}}</div>
+          <picker-view-column v-for="(colum, columnIndex) in pickerValueMulArray" :key="columnIndex">
+            <div class="picker-item" v-for="(item, index) in colum" :key="index">{{item.label}}</div>
           </picker-view-column>
         </block>
       </picker-view>
@@ -130,87 +113,34 @@ export default {
         let hourArray = [];
         let minuteArray = [];
         for (let i = 0; i < 24; i++) {
-          hourArray.push({
-            value: i,
-            label: i > 9 ? `${i} 时` : `0${i} 时`
-          });
+          hourArray.push({value: i, label: i > 9 ? `${i} 时` : `0${i} 时`});
         }
         for (let i = 0; i < 60; i++) {
-          minuteArray.push({
-            value: i,
-            label: i > 9 ? `${i} 分` : `0${i} 分`
-          });
+          minuteArray.push({value: i, label: i > 9 ? `${i} 分` : `0${i} 分`});
         }
         this.pickerValueHour = hourArray;
         this.pickerValueMinute = minuteArray;
       } else if (this.mode === 'multiSelector') {
         this.pickerValueMulArray = valueArray;
-      } else if (this.mode === 'multiLinkageSelector' && this.deepLength === 2) {
-        // 两级联动
-        let pickerValueMulTwoOne = [];
-        let pickerValueMulTwoTwo = [];
-        // 第一列
-        for (let i = 0, length = pickerValueArray.length; i < length; i++) {
-          pickerValueMulTwoOne.push(pickerValueArray[i]);
-        }
-        // 渲染第二列
-        // 如果有设定的默认值
-        if (this.pickerValueDefault.length === 2) {
-          let num = this.pickerValueDefault[0];
-          for (
-            let i = 0, length = pickerValueArray[num].children.length;
-            i < length;
-            i++
-          ) {
-            pickerValueMulTwoTwo.push(pickerValueArray[num].children[i]);
+      } else if (this.mode === 'multiLinkageSelector') {
+        this.pickerValueMulArray = [];
+        let roots = pickerValueArray;
+        for (let i = 0; i < this.deepLength; i++) {
+          const ary = [];
+          roots.forEach((item) => {
+            ary.push({'value': item.value, 'label': item.label});
+          });
+          this.pickerValueMulArray.push(ary);
+          // 准备下一级的列表
+          let defaultValueIndex = this.pickerValueDefault[i];
+          if (defaultValueIndex > ary.length) {
+            defaultValueIndex = 0;
           }
-        } else {
-          for (
-            let i = 0, length = pickerValueArray[0].children.length;
-            i < length;
-            i++
-          ) {
-            pickerValueMulTwoTwo.push(pickerValueArray[0].children[i]);
+          const selected = roots[defaultValueIndex];
+          if (selected) {
+            roots = selected.children || [];
           }
         }
-        this.pickerValueMulTwoOne = pickerValueMulTwoOne;
-        this.pickerValueMulTwoTwo = pickerValueMulTwoTwo;
-      } else if (
-        this.mode === 'multiLinkageSelector' &&
-        this.deepLength === 3
-      ) {
-        let pickerValueMulThreeOne = [];
-        let pickerValueMulThreeTwo = [];
-        let pickerValueMulThreeThree = [];
-        // 第一列
-        for (let i = 0, length = pickerValueArray.length; i < length; i++) {
-          pickerValueMulThreeOne.push(pickerValueArray[i]);
-        }
-        // 渲染第二列
-        this.pickerValueDefault =
-          this.pickerValueDefault.length === 3
-            ? this.pickerValueDefault
-            : [0, 0, 0];
-        if (this.pickerValueDefault.length === 3) {
-          let num = this.pickerValueDefault[0];
-          for (
-            let i = 0, length = pickerValueArray[num].children.length;
-            i < length;
-            i++
-          ) {
-            pickerValueMulThreeTwo.push(pickerValueArray[num].children[i]);
-          }
-          // 第三列
-          let numSecond = this.pickerValueDefault[1];
-          for (let i = 0, length = pickerValueArray[num].children[numSecond].children.length; i < length; i++) {
-            pickerValueMulThreeThree.push(
-              pickerValueArray[num].children[numSecond].children[i]
-            );
-          }
-        }
-        this.pickerValueMulThreeOne = pickerValueMulThreeOne;
-        this.pickerValueMulThreeTwo = pickerValueMulThreeTwo;
-        this.pickerValueMulThreeThree = pickerValueMulThreeThree;
       }
     },
     show() {
@@ -230,7 +160,7 @@ export default {
     },
     pickerCancel() {
       this.showPicker = false;
-      this._initPickerVale();
+      this._initPickerValue();
       let pickObj = {
         index: this.pickerValue,
         value: this._getPickerLabelAndValue(this.pickerValue, this.mode).value,
@@ -240,7 +170,7 @@ export default {
     },
     pickerConfirm(e) {
       this.showPicker = false;
-      this._initPickerVale();
+      this._initPickerValue();
       let pickObj = {
         index: this.pickerValue,
         value: this._getPickerLabelAndValue(this.pickerValue, this.mode).value,
@@ -260,55 +190,27 @@ export default {
       };
       this.$emit('onChange', pickObj);
     },
-    pickerChangeMul(e) {
-      if (this.deepLength === 2) {
-        let pickerValueArray = this.pickerValueArray;
-        let changeValue = e.mp.detail.value;
-        // 处理第一列滚动
-        if (changeValue[0] !== this.pickerValue[0]) {
-          let pickerValueMulTwoTwo = [];
-          // 第一列滚动第二列数据更新
-          for (let i = 0, length = pickerValueArray[changeValue[0]].children.length; i < length; i++) {
-            pickerValueMulTwoTwo.push(pickerValueArray[changeValue[0]].children[i]);
-          }
-          this.pickerValueMulTwoTwo = pickerValueMulTwoTwo;
-          // 第二列初始化为 0
-          changeValue[1] = 0;
+    pickerChangeMultiLinkage (e) {
+      let changeValue = e.mp.detail.value;
+      this.pickerValueMulArray = [];
+      let roots = this.pickerValueArray;
+      for (let i = 0; i < this.deepLength; i++) {
+        const columnArray = [];
+        roots.forEach((item) => {
+          columnArray.push({'value': item.value, 'label': item.label});
+        });
+        this.pickerValueMulArray.push(columnArray);
+        // 准备下一级的列表
+        let idx = changeValue[i];
+        if (idx >= columnArray.length) {
+          idx = 0;
         }
-        this.pickerValue = changeValue;
-      } else if (this.deepLength === 3) {
-        let pickerValueArray = this.pickerValueArray;
-        let changeValue = e.mp.detail.value;
-        let pickerValueMulThreeTwo = [];
-        let pickerValueMulThreeThree = [];
-        // 重新渲染第二列
-        // 如果是第一列滚动
-        if (changeValue[0] !== this.pickerValue[0]) {
-          this.pickerValueMulThreeTwo = [];
-          for (let i = 0, length = pickerValueArray[changeValue[0]].children.length; i < length; i++) {
-            pickerValueMulThreeTwo.push(pickerValueArray[changeValue[0]].children[i]);
-          }
-          // 重新渲染第三列
-          for (let i = 0, length = pickerValueArray[changeValue[0]].children[0].children.length; i < length; i++) {
-            pickerValueMulThreeThree.push(pickerValueArray[changeValue[0]].children[0].children[i]);
-          }
-          changeValue[1] = 0;
-          changeValue[2] = 0;
-          this.pickerValueMulThreeTwo = pickerValueMulThreeTwo;
-          this.pickerValueMulThreeThree = pickerValueMulThreeThree;
-        } else if (changeValue[1] !== this.pickerValue[1]) {
-          // 第二列滚动
-          // 重新渲染第三列
-          this.pickerValueMulThreeThree = [];
-          pickerValueMulThreeTwo = this.pickerValueMulThreeTwo;
-          for (let i = 0, length = pickerValueArray[changeValue[0]].children[changeValue[1]].children.length; i < length; i++) {
-            pickerValueMulThreeThree.push(pickerValueArray[changeValue[0]].children[changeValue[1]].children[i]);
-          }
-          changeValue[2] = 0;
-          this.pickerValueMulThreeThree = pickerValueMulThreeThree;
+        const selected = roots[idx];
+        if (selected) {
+          roots = selected.children || [];
         }
-        this.pickerValue = changeValue;
       }
+      this.pickerValue = changeValue;
       let pickObj = {
         index: this.pickerValue,
         value: this._getPickerLabelAndValue(this.pickerValue, this.mode).value,
@@ -338,19 +240,19 @@ export default {
           pickerGetValue.push(this.pickerValueMulArray[i][value[i]].value);
         }
       } else if (mode === 'multiLinkageSelector') {
-        /* eslint-disable indent */
-        pickerLable =
-          this.deepLength === 2 ? `${this.pickerValueMulTwoOne[value[0]].label}-${this.pickerValueMulTwoTwo[value[1]].label}`
-            : `${this.pickerValueMulThreeOne[value[0]].label}-${this.pickerValueMulThreeTwo[value[1]].label}-${this.pickerValueMulThreeThree[value[2]].label}`;
-        if (this.deepLength === 2) {
-          pickerGetValue.push(this.pickerValueMulTwoOne[value[0]].value);
-          pickerGetValue.push(this.pickerValueMulTwoTwo[value[1]].value);
-        } else {
-          pickerGetValue.push(this.pickerValueMulThreeOne[value[0]].value);
-          pickerGetValue.push(this.pickerValueMulThreeTwo[value[1]].value);
-          pickerGetValue.push(this.pickerValueMulThreeThree[value[2]].value);
+        pickerLable = '';
+        let roots = this.pickerValueArray;
+        for (let i = 0; i < this.deepLength; i++) {
+          let selectedElement = roots[value[i]];
+          if (selectedElement) {
+            pickerLable += i > 0 ? '-' + selectedElement.label : selectedElement.label;
+            pickerGetValue.push(selectedElement.value);
+            roots = selectedElement.children || [];
+          } else {
+            pickerGetValue.push(0);
+            roots = [];
+          }
         }
-        /* eslint-enable indent */
       }
       return {
         label: pickerLable,
@@ -358,22 +260,16 @@ export default {
       };
     },
     // 初始化 pickerValue 默认值
-    _initPickerVale() {
+    _initPickerValue() {
       if (this.pickerValue.length === 0) {
         if (this.mode === 'selector') {
           this.pickerValue = [0];
         } else if (this.mode === 'multiSelector') {
           this.pickerValue = new Int8Array(this.pickerValueArray.length);
-        } else if (
-          this.mode === 'multiLinkageSelector' &&
-          this.deepLength === 2
-        ) {
-          this.pickerValue = [0, 0];
-        } else if (
-          this.mode === 'multiLinkageSelector' &&
-          this.deepLength === 3
-        ) {
-          this.pickerValue = [0, 0, 0];
+        } else if (this.mode === 'multiLinkageSelector') {
+          for (let i = 0; i < this.deepLength; i++) {
+            this.pickerValue.push(0);
+          }
         }
       }
     }

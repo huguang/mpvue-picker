@@ -11,14 +11,22 @@
       <button type="default" @click="showMulPicker">多列选择</button>
       <button type="default" @click="showMulLinkageTwoPicker">二级联动选择</button>
       <button type="default" @click="showMulLinkageThreePicker">三级联动选择</button>
+      <button type="default" @click="showMulLinkageRegionPicker">地域联动选择</button>
     </div>
-    <mpvue-picker ref="mpvuePicker" :mode="mode" :deepLength=deepLength :pickerValueDefault="pickerValueDefault" @onChange="onChange" @onConfirm="onConfirm" @onCancel="onCancel" :pickerValueArray="pickerValueArray"></mpvue-picker>
+    <mpvue-picker ref="mpvuePicker" :mode="mode" :deepLength="deepLength"
+                  :pickerValueDefault="pickerValueDefault" :pickerValueArray="pickerValueArray"
+                  @onChange="onChange" @onConfirm="onConfirm" @onCancel="onCancel"
+                  themeColor="#5773F9"></mpvue-picker>
   </div>
 </template>
 
 <script>
 import mpvuePicker from '@/mpvue-picker/mpvuePicker.vue';
-// import mpvuePicker from 'mpvue-picker';
+const single = require('@/dicts/single.json');
+const multi = require('@/dicts/multi.json');
+const linkageTwo = require('@/dicts/linkage-two.json');
+const linkageThree = require('@/dicts/linkage-three.json');
+const regions = require('@/dicts/regions.json');
 export default {
   components: {
     mpvuePicker
@@ -30,190 +38,34 @@ export default {
       pickerValueDefault: [], // 初始化值
       pickerValueArray: [], // picker 数组值
       pickerText: '',
-      pickerSingleArray: [
-        {
-          label: '住宿费',
-          value: 1
-        },
-        {
-          label: '活动费',
-          value: 2
-        },
-        {
-          label: '通讯费',
-          value: 3
-        },
-        {
-          label: '补助',
-          value: 4
-        }
-      ],
-      pickerMulArray: [
-        [
-          { label: '中国', value: 1 },
-          { label: '美国', value: 2 },
-          { label: '日本', value: 3 },
-          { label: '俄罗斯', value: 4 }
-        ],
-        [
-          { label: '茶', value: 1 },
-          { label: '咖啡', value: 2 },
-          { label: '寿司', value: 3 },
-          { label: '奶酪', value: 4 }
-        ],
-        [
-          { label: '歼20', value: 1 },
-          { label: 'F22', value: 2 },
-          { label: '秋月级', value: 3 },
-          { label: 'T50', value: 4 }
-        ]
-      ],
-      mulLinkageTwoPicker: [
-        {
-          label: '飞机票',
-          value: 0,
-          children: [
-            {
-              label: '经济舱',
-              value: 1
-            },
-            {
-              label: '商务舱',
-              value: 2
-            }
-          ]
-        },
-        {
-          label: '火车票',
-          value: 1,
-          children: [
-            {
-              label: '卧铺',
-              value: 1
-            },
-            {
-              label: '坐票',
-              value: 2
-            },
-            {
-              label: '站票',
-              value: 3
-            }
-          ]
-        },
-        {
-          label: '汽车票',
-          value: 3,
-          children: [
-            {
-              label: '快班',
-              value: 1
-            },
-            {
-              label: '普通',
-              value: 2
-            }
-          ]
-        }
-      ],
-      mulLinkageThreePicker: [
-        {
-          label: 'phone',
-          value: 0,
-          children: [
-            {
-              label: 'iphone',
-              value: 1,
-              children: [
-                {
-                  label: 'iphoneX',
-                  value: 1
-                },
-                {
-                  label: 'iphone8',
-                  value: 2
-                },
-                {
-                  label: 'iphone8 Plus',
-                  value: 3
-                }
-              ]
-            },
-            {
-              label: 'android',
-              value: 1,
-              children: [
-                {
-                  label: 'vivo',
-                  value: 1
-                },
-                {
-                  label: '魅族',
-                  value: 2
-                },
-                {
-                  label: '小米',
-                  value: 3
-                }
-              ]
-            }
-          ]
-        },
-        {
-          label: 'PC',
-          value: 0,
-          children: [
-            {
-              label: 'mac',
-              value: 1,
-              children: [
-                {
-                  label: 'macbook Pro',
-                  value: 1
-                },
-                {
-                  label: 'iMac',
-                  value: 2
-                },
-                {
-                  label: 'mackbook',
-                  value: 3
-                },
-                {
-                  label: 'mackbook air',
-                  value: 3
-                }
-              ]
-            },
-            {
-              label: 'windows',
-              value: 1,
-              children: [
-                {
-                  label: 'dell',
-                  value: 1
-                },
-                {
-                  label: 'surface',
-                  value: 2
-                },
-                {
-                  label: 'thinkpad',
-                  value: 3
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      pickerSingleArray: single,
+      pickerMulArray: multi,
+      mulLinkageTwoPicker: linkageTwo,
+      mulLinkageThreePicker: linkageThree,
+      mulLinkageRegionPicker: regions
     };
   },
   methods: {
     onChange(e) {
+      console.log('index onChange')
       console.log(e);
     },
     onCancel(e) {
+      console.log('index onCancel')
       console.log(e);
+    },
+    onConfirm(e) {
+      console.log('index onConfirm')
+      console.log(e);
+      if (this.mode === 'selector') {
+        this.pickerText = e.label;
+      } else if (this.mode === 'timeSelector') {
+        this.pickerText = e.label;
+      } else if (this.mode === 'multiSelector') {
+        this.pickerText = e.label;
+      } else if (this.mode === 'multiLinkageSelector') {
+        this.pickerText = e.label;
+      }
     },
     // 单列
     showSinglePicker() {
@@ -251,28 +103,16 @@ export default {
       this.pickerValueDefault = [1, 1, 1];
       this.$refs.mpvuePicker.show();
     },
-    showPickerView() {
+    // 地域联动选择
+    showMulLinkageRegionPicker() {
+      this.pickerValueArray = this.mulLinkageRegionPicker;
+      this.mode = 'multiLinkageSelector';
+      this.deepLength = 3;
+      this.pickerValueDefault = [0, 0, 0];
       this.$refs.mpvuePicker.show();
     },
-    onConfirm(e) {
-      console.log(e);
-      if (this.mode === 'selector') {
-        this.pickerText = e.label;
-      } else if (this.mode === 'timeSelector') {
-        this.pickerText = e.label;
-      } else if (this.mode === 'multiSelector') {
-        this.pickerText = e.label;
-      } else if (
-        this.mode === 'multiLinkageSelector' &&
-        this.deepLength === 2
-      ) {
-        this.pickerText = e.label;
-      } else if (
-        this.mode === 'multiLinkageSelector' &&
-        this.deepLength === 3
-      ) {
-        this.pickerText = e.label;
-      }
+    showPickerView() {
+      this.$refs.mpvuePicker.show();
     }
   }
 };

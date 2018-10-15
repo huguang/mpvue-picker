@@ -1,0 +1,51 @@
+[
+  {
+    "label": "phone",
+    "value": 0,
+    "children": [
+      {
+        "label": "iphone",
+        "value": 1,
+        "children": [
+          { "label": "iphoneX", "value": 1 },
+          { "label": "iphone8", "value": 2 },
+          { "label": "iphone8 Plus", "value": 3 }
+        ]
+      },
+      {
+        "label": "android",
+        "value": 1,
+        "children": [
+          { "label": "vivo", "value": 1 },
+          { "label": "魅族", "value": 2 },
+          { "label": "小米", "value": 3 }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "PC",
+    "value": 0,
+    "children": [
+      {
+        "label": "mac",
+        "value": 1,
+        "children": [
+          { "label": "macbook Pro", "value": 1 },
+          { "label": "iMac", "value": 2 },
+          { "label": "mackbook", "value": 3 },
+          { "label": "mackbook air", "value": 3 }
+        ]
+      },
+      {
+        "label": "windows",
+        "value": 1,
+        "children": [
+          { "label": "dell", "value": 1 },
+          { "label": "surface", "value": 2 },
+          { "label": "thinkpad", "value": 3 }
+        ]
+      }
+    ]
+  }
+]
